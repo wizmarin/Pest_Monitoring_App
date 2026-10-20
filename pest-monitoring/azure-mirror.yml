@@ -11,7 +11,7 @@ resources:
   repositories:
   - repository: azureMirror
     type: git
-    name: Pest-Monitoring-App/Pest_Monitoring_App
+    name: Pest-Monitoring-App/Pest_Monitoring_App.git
 
 jobs:
 - job: Mirror
