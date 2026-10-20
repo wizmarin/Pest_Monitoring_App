@@ -6,9 +6,6 @@ trigger:
     include: ['*']
 pr: none
 
-pool:
-  vmImage: ubuntu-latest
-
 # Only needed if "Protect access to repositories in YAML pipelines" is ON
 resources:
   repositories:
@@ -16,24 +13,29 @@ resources:
     type: git
     name: Pest-Monitoring-App/Pest_Monitoring_App
 
+jobs:
+- job: Mirror
+  displayName: Mirror GitHub to Azure Repos
+  pool:
+    vmImage: ubuntu-latest
+  uses:
+    repositories:
+    - azureMirror
+
 steps:
 - checkout: self
+  path: github
   fetchDepth: 0
   fetchTags: true
   persistCredentials: false
 
-# Only needed if the protection setting is ON: makes the job "use" the Azure repo
-- checkout: azureMirror
-  path: azure-placeholder
-  fetchDepth: 1
-
 - script: |
     set -e
-    cd "$(Build.SourcesDirectory)"
-    [ -d .git ] || cd "$(Pipeline.Workspace)/s/$(Build.Repository.Name)" 2>/dev/null || true
+    cd "$(Pipeline.Workspace)/github"
+    git update-ref -d refs/remotes/origin/HEAD || true
     git fetch origin '+refs/heads/*:refs/remotes/origin/*' --tags --prune
     git -c http.extraheader="AUTHORIZATION: bearer $(System.AccessToken)" \
       push --force --prune \
-      "https://dev.azure.com/falling-cats/Pest-Monitoring-App/_git/Pest_Monitoring_App" \
+      "https://dev.azure.com/falling-cats/Pest-Monitoring-App/_git/Pest_Monitoring_App.git" \
       'refs/remotes/origin/*:refs/heads/*' 'refs/tags/*:refs/tags/*'
-  displayName: Mirror GitHub to Azure Repos
+  displayName: Push branches and tags to Azure Repos
