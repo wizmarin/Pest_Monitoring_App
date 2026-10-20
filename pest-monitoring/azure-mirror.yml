@@ -22,20 +22,20 @@ jobs:
     repositories:
     - azureMirror
 
-steps:
-- checkout: self
-  path: github
-  fetchDepth: 0
-  fetchTags: true
-  persistCredentials: false
+  steps:
+  - checkout: self
+    path: github
+    fetchDepth: 0
+    fetchTags: true
+    persistCredentials: false
 
-- script: |
-    set -e
-    cd "$(Pipeline.Workspace)/github"
-    git update-ref -d refs/remotes/origin/HEAD || true
-    git fetch origin '+refs/heads/*:refs/remotes/origin/*' --tags --prune
-    git -c http.extraheader="AUTHORIZATION: bearer $(System.AccessToken)" \
-      push --force --prune \
-      "https://dev.azure.com/falling-cats/Pest-Monitoring-App/_git/Pest_Monitoring_App.git" \
-      'refs/remotes/origin/*:refs/heads/*' 'refs/tags/*:refs/tags/*'
-  displayName: Push branches and tags to Azure Repos
+  - script: |
+      set -e
+      cd "$(Pipeline.Workspace)/github"
+      git update-ref -d refs/remotes/origin/HEAD || true
+      git fetch origin '+refs/heads/*:refs/remotes/origin/*' --tags --prune
+      git -c http.extraheader="AUTHORIZATION: bearer $(System.AccessToken)" \
+        push --force --prune \
+        "https://dev.azure.com/falling-cats/Pest-Monitoring-App/_git/Pest_Monitoring_App.git" \
+        'refs/remotes/origin/*:refs/heads/*' 'refs/tags/*:refs/tags/*'
+    displayName: Push branches and tags to Azure Repos
